@@ -1,10 +1,10 @@
 import csv, os, time
 import serial
 
-variaveis = ["HORA", "mV", "mA", "mW", "mV", "mA", "mW", "°C"]
+variaveis = ["Dia", "Hora", "mV", "mA", "mW", "mV", "mA", "mW", "°C"]
 digits = 10 # Quantos digitos vamos alinhar a tabela no console
 
-comport = "COM3" # Altere para a porta desejada
+comport = "COM" # Altere para a porta desejada
 baud = 9600 # Frequência desejada
 
 def printtable(data):
@@ -50,10 +50,9 @@ def printtable(data):
 # Isso é uma função pois toda vez que for guardar algo na tabela, irá ler essa função que por vez separa as 
 # tabelas por dias, semanas ou meses (Ajustável via código), assim como imprime o cabeçalho nela caso ela ainda não exista.
 def arquivoCSV() -> str:
-    mes_ano = time.strftime("%m_%Y", time.localtime(time.time()))
-    semana = time.strftime("%W", time.localtime(time.time()))
+    mes_ano = time.strftime("%Y_%m_%d", time.localtime(time.time()))
 
-    c = f'{mes_ano}_semana{semana}.csv' # Separar por dias.
+    c = f'MEC{mes_ano}.csv' # Separar por dias.
     if not os.path.exists(c):
         try:
             with open(c, 'a', newline='\n') as file: # Iremos adicionar algo na última linha, e não substiur o arquivo inteiro.
@@ -118,12 +117,13 @@ def listenCOMPORT():
             # Recebe e processa os dados
             dados = ser.readline().decode().strip().split(',')
             if(not dados[0] == ''):
-                dados.insert(0, time.strftime("%H:%M:%S", time.localtime(time.time())))
+                dados.insert(0, time.strftime("%d/%m/%Y", time.localtime(time.time())))
+                dados.insert(1, time.strftime("%H:%M:%S", time.localtime(time.time())))
                 saveToCSV(dados)
                 printtable(dados)
 
     except Exception as e:
-        print("[ERRO DE COMUNICAÇÃO] {e}")
+        print(f"[ERRO DE COMUNICAÇÃO] {e}")
         pass
     finally:
         ser.close()
